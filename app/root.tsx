@@ -1,14 +1,7 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "./shopify.server";
 import { AdminApiContextWithoutRest } from "node_modules/@shopify/shopify-app-remix/dist/ts/server/clients/admin/types";
-
-const http400 = (message: string): Response => {
-  return Response.json({ error: message }, { status: 400 });
-};
-
-const http500 = (): Response => {
-  return Response.json({ error: "internal server error" }, { status: 500 });
-};
+import { responseBadRequest, responseMethodNotAllowed, responseInternalServerError, responseProductAlreadyInWishlist, responseAddedToWishlist  } from "./util/util";
 
 const customerService = (admin: AdminApiContextWithoutRest) => {
   return {
@@ -18,7 +11,6 @@ const customerService = (admin: AdminApiContextWithoutRest) => {
         query CurrentWishlist($id: ID!) {
           customer(id: $id) {
             metafield(namespace: "custom", key: "wishlist") {
-              type
               jsonValue
             }
           }
@@ -80,10 +72,10 @@ const getParams = (request: Request) => {
   const url = new URL(request.url);
 
   const productId = url.searchParams.get("productid");
-  if (!productId) return http400("Missing productid");
+  if (!productId) return responseBadRequest("Missing productid");
 
   const shop = url.searchParams.get("shop");
-  if (!shop) return http400("Missing shop");
+  if (!shop) return responseBadRequest("Missing shop");
 
   const loggedInCustomerId =
     url.searchParams.get("logged_in_customer_id") || "";
@@ -103,11 +95,18 @@ const getParams = (request: Request) => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  if (request.method !== "POST") {
-    console.warn("method ", request.method, " not allowed");
-    return Response.json({ error: "Method not allowed" }, { status: 405 });
+  switch (request.method) {
+    case "POST":
+      return await postAction(request);
+    case "DELETE":
+      return await deleteAction(request);
+    default:
+      console.warn("method ", request.method, " not allowed");
+      return Response.json(responseMethodNotAllowed);
   }
+}
 
+const postAction = async (request: Request): Promise<Response> => {
   const { admin } = await authenticate.public.appProxy(request);
   if (!admin) {
     console.warn("app not installed");
@@ -128,13 +127,10 @@ export async function action({ request }: ActionFunctionArgs) {
     );
     if (!wishlist.find((p) => p == newProductId)) {
       wishlist.push(newProductId);
-            console.log(newProductId)
       await service.updateCustomerWishlist(params.loggedInCustomerId, wishlist);
-      return Response.json({ message: "Added to wishlist!" });
+      return responseAddedToWishlist();
     } else {
-      return Response.json({
-        message: "Product already exists in your wishlist.",
-      });
+      return responseProductAlreadyInWishlist();
     }
   } catch (e) {
     if (!(e instanceof Error))
@@ -148,11 +144,12 @@ export async function action({ request }: ActionFunctionArgs) {
         "An error occurred while performing GraphQL query: ",
         e.message,
       );
-    return Response.json(
-      {
-        message: "internal server error",
-      },
-      { status: 500 },
-    );
+    return responseInternalServerError();
   }
-}
+};
+
+const deleteAction = async (request: Request): Promise<Response> => {
+  return Response.json({
+    message: "ok",
+  });
+};
