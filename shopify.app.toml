@@ -2,7 +2,7 @@
 
 client_id = "6b34b3cc48901fa60653529190de44d4"
 name = "wishlist-go-backend"
-application_url = "https://example.com"
+application_url = "https://gizug0-vd.myshopify.com"
 embedded = true
 
 [build]
@@ -21,10 +21,14 @@ api_version = "2025-10"
   uri = "/webhooks/app/scopes_update"
 
 [access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = ""
+scopes = "write_app_proxy"
 optional_scopes = [ ]
 use_legacy_install_flow = false
+
+[app_proxy]
+url="https://gizug0-vd.myshopify.com/"
+prefix="apps"
+subpath="wishlist"
 
 [auth]
 redirect_urls = [ ]
