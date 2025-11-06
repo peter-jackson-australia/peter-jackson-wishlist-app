@@ -13,6 +13,7 @@ import {
 
 const customerService = (admin: AdminApiContextWithoutRest) => {
   return {
+    authoriseCustomer: async (request: Request) => {},
     getCustomerWishlist: async (loggedInCustomerId: string) => {
       const ownerId = `gid://shopify/Customer/${loggedInCustomerId}`;
       const QUERY_CURRENT = `#graphql
@@ -115,7 +116,8 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 const postAction = async (request: Request): Promise<Response> => {
-  const { admin } = await authenticate.public.appProxy(request);
+  const d = await authenticate.public.appProxy(request);
+  const admin = d.admin
   if (!admin) {
     console.warn("app not installed");
     return Response.json(

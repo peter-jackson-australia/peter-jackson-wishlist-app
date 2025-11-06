@@ -6,6 +6,7 @@ import {
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
+import { shopifyApi } from "@shopify/shopify-api";
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -23,6 +24,17 @@ const shopify = shopifyApp({
   ...(process.env.SHOP_CUSTOM_DOMAIN
     ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
     : {}),
+});
+
+export const shopifyApiInstance = shopifyApi({
+  apiKey: process.env.SHOPIFY_API_KEY,
+  apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
+  apiVersion: ApiVersion.January25,
+  appUrl: process.env.SHOPIFY_APP_URL || "",
+  scopes: process.env.SCOPES?.split(","),
+  hostScheme: process.env.HOST?.split("://")[0] === "http" ? "http" : "https",
+  hostName: process.env.HOST?.replace(/https?:\/\//, "") ?? "localhost",
+  isEmbeddedApp: true,
 });
 
 export default shopify;

@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "6b34b3cc48901fa60653529190de44d4"
-name = "wishlist-go-backend"
+name = "wishlist"
 application_url = "https://gizug0-vd.myshopify.com"
 embedded = true
 
