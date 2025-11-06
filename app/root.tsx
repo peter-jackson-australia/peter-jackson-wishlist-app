@@ -1,7 +1,15 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "./shopify.server";
 import { AdminApiContextWithoutRest } from "node_modules/@shopify/shopify-app-remix/dist/ts/server/clients/admin/types";
-import { responseBadRequest, responseMethodNotAllowed, responseInternalServerError, responseProductAlreadyInWishlist, responseAddedToWishlist  } from "./util/util";
+import {
+  responseBadRequest,
+  responseMethodNotAllowed,
+  responseInternalServerError,
+  responseProductAlreadyInWishlist,
+  responseAddedToWishlist,
+  responseDeletedFromWishlist,
+  responseProductNotInWishlist,
+} from "./util/util";
 
 const customerService = (admin: AdminApiContextWithoutRest) => {
   return {
@@ -149,7 +157,47 @@ const postAction = async (request: Request): Promise<Response> => {
 };
 
 const deleteAction = async (request: Request): Promise<Response> => {
-  return Response.json({
-    message: "ok",
-  });
+  const { admin } = await authenticate.public.appProxy(request);
+  if (!admin) {
+    console.warn("app not installed");
+    return Response.json(
+      { error: "App not installed for this shop" },
+      { status: 403 },
+    );
+  }
+
+  const params = getParams(request);
+  if (params instanceof Response) return params;
+
+  try {
+    const toDelete = `gid://shopify/Product/${params.productId}`;
+    const service = customerService(admin);
+    const wishlist = await service.getCustomerWishlist(
+      params.loggedInCustomerId,
+    );
+
+    const filteredWishlist = wishlist.filter((t) => t !== toDelete);
+    if (filteredWishlist.length < wishlist.length) {
+      await service.updateCustomerWishlist(
+        params.loggedInCustomerId,
+        filteredWishlist,
+      );
+      return responseDeletedFromWishlist();
+    } else {
+      return responseProductNotInWishlist();
+    }
+  } catch (e) {
+    if (!(e instanceof Error))
+      console.error("Unknown error occurred while inserting product");
+    else if ((e as any)?.body?.errors)
+      console.error(
+        `Erorrs occurred while performing GraphQL query: ${JSON.stringify((e as any).body.errors)}`,
+      );
+    else
+      console.error(
+        "An error occurred while performing GraphQL query: ",
+        e.message,
+      );
+    return responseInternalServerError();
+  }
 };

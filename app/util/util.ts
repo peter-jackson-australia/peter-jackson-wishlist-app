@@ -17,5 +17,16 @@ export const responseProductAlreadyInWishlist = (): Response => {
 };
 
 export const responseAddedToWishlist = (): Response => {
-  return Response.json({ message: "Added to wishlist!" }, { status: 201 });
+  return Response.json({ message: "added to wishlist" }, { status: 201 });
+};
+
+export const responseDeletedFromWishlist = (): Response => {
+  return Response.json({ message: "removed from wishlist" }, { status: 201 });
+};
+
+export const responseProductNotInWishlist = (): Response => {
+  return Response.json(
+    { message: "product with specified id not found in wishlist" },
+    { status: 400 },
+  );
 };
