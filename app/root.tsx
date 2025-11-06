@@ -43,11 +43,7 @@ export async function action({ request }: any) {
     );
   }
 
-  console.log(
-    "recieved POST request: user: ",
-    loggedInCustomerId,
-    ", shop: ",
-    shop,
-  );
+
+
   return Response.json({ message: "success" });
 }
