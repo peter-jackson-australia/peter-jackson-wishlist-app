@@ -90,9 +90,12 @@ const getParams = (request: Request) => {
     url.searchParams.get("logged_in_customer_id") || "";
   if (!loggedInCustomerId) {
     console.warn("customer must be logged in to perform this action");
-    return Response.json(
-      { error: "Customer must be logged in" },
-      { status: 401 },
+    return new Response(
+      JSON.stringify({ error: "Customer must be logged in" }),
+      { 
+        status: 401,
+        headers: { "Content-Type": "application/json" }
+      }
     );
   }
 
