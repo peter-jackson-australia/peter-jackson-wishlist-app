@@ -2,7 +2,7 @@
 
 client_id = "ccc8008d5a65edf4831005bd21a62979"
 name = "wishlist"
-application_url = "https://peter-jackson-wishlist-app-production.up.railway.app/"
+application_url = "https://peter-jackson-wishlist-app-production.up.railway.app"
 embedded = true
 
 [build]
