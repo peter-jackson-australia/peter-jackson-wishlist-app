@@ -1,13 +1,12 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "6b34b3cc48901fa60653529190de44d4"
+client_id = "ccc8008d5a65edf4831005bd21a62979"
 name = "wishlist"
-application_url = "https://gizug0-vd.myshopify.com"
+application_url = "https://example.com"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
-include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-10"
@@ -27,7 +26,7 @@ optional_scopes = [ ]
 use_legacy_install_flow = false
 
 [app_proxy]
-url="/"
+url="https://gizug0-vd.myshopify.com/"
 prefix="apps"
 subpath="wishlist"
 
