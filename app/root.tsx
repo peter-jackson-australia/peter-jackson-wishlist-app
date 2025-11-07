@@ -115,7 +115,7 @@ export async function action({ request }: ActionFunctionArgs) {
         return await deleteAction(request);
       default:
         console.warn("method ", request.method, " not allowed");
-        return Response.json(responseMethodNotAllowed);
+        return responseMethodNotAllowed();
     }
   } catch (e) {
     if (e instanceof Response) {
@@ -139,9 +139,12 @@ const postAction = async (request: Request): Promise<Response> => {
   const admin = d.admin;
   if (!admin) {
     console.warn("app not installed");
-    return Response.json(
-      { error: "App not installed for this shop" },
-      { status: 403 },
+    return new Response(
+      JSON.stringify({ error: "App not installed for this shop" }),
+      { 
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+      }
     );
   }
 
@@ -181,9 +184,12 @@ const deleteAction = async (request: Request): Promise<Response> => {
   const { admin } = await authenticate.public.appProxy(request);
   if (!admin) {
     console.warn("app not installed");
-    return Response.json(
-      { error: "App not installed for this shop" },
-      { status: 403 },
+    return new Response(
+      JSON.stringify({ error: "App not installed for this shop" }),
+      { 
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+      }
     );
   }
 
