@@ -104,20 +104,36 @@ const getParams = (request: Request) => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  switch (request.method) {
-    case "POST":
-      return await postAction(request);
-    case "DELETE":
-      return await deleteAction(request);
-    default:
-      console.warn("method ", request.method, " not allowed");
-      return Response.json(responseMethodNotAllowed);
+  try {
+    switch (request.method) {
+      case "POST":
+        return await postAction(request);
+      case "DELETE":
+        return await deleteAction(request);
+      default:
+        console.warn("method ", request.method, " not allowed");
+        return Response.json(responseMethodNotAllowed);
+    }
+  } catch (e) {
+    if (e instanceof Response) {
+      console.warn(
+        "error while performing action (will return response): ",
+        JSON.stringify(e, null, 2),
+      );
+      return e;
+    } else {
+      console.error(
+        "error while performing action (will return 500): ",
+        JSON.stringify(e, null, 2),
+      );
+      return responseInternalServerError();
+    }
   }
 }
 
 const postAction = async (request: Request): Promise<Response> => {
   const d = await authenticate.public.appProxy(request);
-  const admin = d.admin
+  const admin = d.admin;
   if (!admin) {
     console.warn("app not installed");
     return Response.json(
