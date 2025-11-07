@@ -1,4 +1,4 @@
-FROM oven/bun:1
+FROM oven/bun:alpine
 RUN apk add --no-cache openssl
 
 EXPOSE 3000
