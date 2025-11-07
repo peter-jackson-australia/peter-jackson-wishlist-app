@@ -1,4 +1,4 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "./shopify.server";
 import { AdminApiContextWithoutRest } from "node_modules/@shopify/shopify-app-remix/dist/ts/server/clients/admin/types";
 import {
@@ -10,7 +10,73 @@ import {
   responseDeletedFromWishlist,
   responseProductNotInWishlist,
 } from "./util/util";
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+} from "@remix-run/react";
 
+// Add this loader to handle embedded app installation
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  await authenticate.admin(request);
+  return null;
+};
+
+// Your existing action code
+export async function action({ request }: ActionFunctionArgs) {
+  try {
+    switch (request.method) {
+      case "POST":
+        return await postAction(request);
+      case "DELETE":
+        return await deleteAction(request);
+      default:
+        console.warn("method ", request.method, " not allowed");
+        return responseMethodNotAllowed();
+    }
+  } catch (e) {
+    if (e instanceof Response) {
+      console.warn(
+        "error while performing action (will return response): ",
+        JSON.stringify(e, null, 2),
+      );
+      return e;
+    } else {
+      console.error(
+        "error while performing action (will return 500): ",
+        JSON.stringify(e, null, 2),
+      );
+      return responseInternalServerError();
+    }
+  }
+}
+
+// Add the Layout and App components
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+export default function App() {
+  return <Outlet />;
+}
+
+// Your existing customer service and action functions below...
 const customerService = (admin: AdminApiContextWithoutRest) => {
   return {
     authoriseCustomer: async (request: Request) => {},
@@ -105,34 +171,6 @@ const getParams = (request: Request) => {
     loggedInCustomerId,
   } as PostWishlistItemParams;
 };
-
-export async function action({ request }: ActionFunctionArgs) {
-  try {
-    switch (request.method) {
-      case "POST":
-        return await postAction(request);
-      case "DELETE":
-        return await deleteAction(request);
-      default:
-        console.warn("method ", request.method, " not allowed");
-        return responseMethodNotAllowed();
-    }
-  } catch (e) {
-    if (e instanceof Response) {
-      console.warn(
-        "error while performing action (will return response): ",
-        JSON.stringify(e, null, 2),
-      );
-      return e;
-    } else {
-      console.error(
-        "error while performing action (will return 500): ",
-        JSON.stringify(e, null, 2),
-      );
-      return responseInternalServerError();
-    }
-  }
-}
 
 const postAction = async (request: Request): Promise<Response> => {
   const d = await authenticate.public.appProxy(request);
