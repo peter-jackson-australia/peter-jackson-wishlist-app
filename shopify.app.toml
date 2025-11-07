@@ -26,7 +26,7 @@ optional_scopes = [ ]
 use_legacy_install_flow = false
 
 [app_proxy]
-url="https://peter-jackson-wishlist-app-production.up.railway.app/"
+url="https://peter-jackson-wishlist-app-production.up.railway.app"
 prefix="apps"
 subpath="wishlist"
 
