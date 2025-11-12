@@ -19,10 +19,10 @@ import {
 } from "@remix-run/react";
 
 // Add this loader to handle embedded app installation
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
-  return null;
-};
+// export const loader = async ({ request }: LoaderFunctionArgs) => {
+//   await authenticate.admin(request);
+//   return null;
+// };
 
 // Your existing action code
 export async function action({ request }: ActionFunctionArgs) {
