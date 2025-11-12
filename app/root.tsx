@@ -19,7 +19,20 @@ import {
 } from "@remix-run/react";
 
 // Add this loader to handle embedded app installation
+// export const loader = async ({ request }: LoaderFunctionArgs) => {
+//   await authenticate.admin(request);
+//   return null;
+// };
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  
+  // Don't authenticate app proxy requests or public routes
+  if (url.pathname.startsWith('/apps/') || 
+      url.pathname.startsWith('/auth/')) {
+    return null;
+  }
+  
   await authenticate.admin(request);
   return null;
 };
